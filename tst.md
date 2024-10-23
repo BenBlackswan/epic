@@ -2,6 +2,10 @@
 
 **Exercise 2-1: Writing a Basic SQL Query**
 
+<span style="color: red">aoeuaoeu</span> 
+
+<strong>strong text</strong>
+
 USE Caboodle_Feb
 
 SELECT Name
@@ -31,6 +35,20 @@ SELECT HSP_ACCOUNT.HSP_ACCOUNT_NAME,
 		<br>ON HSP_ACCOUNT.HSP_ACCOUNT_ID = HSP_ACCT_DX_LIST.HSP_ACCOUNT_ID
 
 
+**Exercise 3-3: Using a Left Outer Join**
+
+USE Clarity_Feb
+
+SELECT HSP_ACCOUNT.HSP_ACCOUNT_NAME,
+		HSP_ACCOUNT.HSP_ACCOUNT_ID,
+		HSP_ACCT_DX_LIST.DX_ID,
+		HSP_ACCT_DX_LIST.FINAL_DX_POA_C
+FROM HSP_ACCOUNT
+	LEFT OUTER JOIN HSP_ACCT_DX_LIST
+		ON HSP_ACCOUNT.HSP_ACCOUNT_ID = HSP_ACCT_DX_LIST.HSP_ACCOUNT_ID
+
+
+  
 **Exercise 3-4: Adding More Tables**
 
 USE Clarity_Feb
@@ -62,12 +80,42 @@ FROM PAT_ENC
 		ON PAT_ENC.PCP_PROV_ID = PCP.PROV_ID
 
 
+**Exercise 3-7: Write the SQL Query Using Your Join Diagram**
+
+USE Clarity_Feb
+
+SELECT PATIENT.PAT_NAME,
+		ZC_TAX_STATE.NAME,
+		CLARITY_SER.PROV_NAME
+FROM PATIENT
+	INNER JOIN ZC_TAX_STATE
+		ON PATIENT.STATE_C = ZC_TAX_STATE.TAX_STATE_C
+	LEFT OUTER JOIN CLARITY_SER
+		ON PATIENT.CUR_PCP_PROV_ID = CLARITY_SER.PROV_ID
+
+
+
+  
 
 **Exercise 4-1: Exploring Columns**
 
 USE Caboodle_Feb
 
 EXECUTE SP_COLUMNS BirthFact
+
+
+**Exercise 4-2: Write a Query Using Column Aliases**
+
+USE Caboodle_Feb
+
+SELECT MedicationEpicId AS [Medication ID],
+		SimpleGenericName AS [Medication Name],
+		Form AS [Medication Form],
+		Strength AS [Medication Strength],
+		PharmaceuticalClass AS [Pharmaceutical Class],
+		Route AS [Administration Route],
+		DeaClass AS [DEA Code]
+FROM MedicationDim
 
 
 **Exercise 4-6: Working with Date/Time Functions**
@@ -111,8 +159,8 @@ SELECT PAT_ID,
 	DATEDIFF(d,HOSP_ADMSN_TIME,HOSP_DISCH_TIME)+1 AS "Number of Dates"
 FROM PAT_ENC_HSP
 
--- RPT101i: SQL I Self-Study Answer Keys
--- Exercise 4-10: Using Many Functions Together (Challenge #1)
+
+**Exercise 4-10: Using Many Functions Together (Challenge #1)**
 
 USE Clarity_Feb
 
@@ -127,8 +175,8 @@ SELECT PAT_ID,
 	DATEDIFF(hh,HOSP_ADMSN_TIME,HOSP_DISCH_TIME) / 24.0 AS "Length of Stay"
 FROM PAT_ENC_HSP
 
--- RPT101i: SQL I Self-Study Answer Keys
--- Exercise 4-10: Using Many Functions Together (Challenge #2)
+
+**Exercise 4-10: Using Many Functions Together (Challenge #2)**
 
 USE Clarity_Feb
 
@@ -148,3 +196,266 @@ FROM PAT_ENC_HSP
 		ON PAT_ENC_HSP.ADMISSION_PROV_ID = ADMSN_PROV.PROV_ID
 	LEFT OUTER JOIN CLARITY_SER AS "DISCH_PROV"
 		ON PAT_ENC_HSP.DISCHARGE_PROV_ID = DISCH_PROV.PROV_ID
+
+**Exercise 5-2: CASE with Date/Time**
+
+USE Caboodle_Feb
+
+SELECT PatientEpicId,
+	Name,
+	City,
+	BirthDate,
+	CASE WHEN BirthDate <= DATEADD(yy,-18,CURRENT_TIMESTAMP) THEN 'Adult Patient'
+		 WHEN BirthDate > DATEADD(yy,-18,CURRENT_TIMESTAMP) THEN 'Pediatric Patient'
+		 ELSE 'Unknown Age' END AS "Demographic"
+FROM PatientDim_Current
+
+**Exercise 5-3: CASE with NULL Values**
+
+USE Clarity_Feb
+
+SELECT MEDICATION_ID,
+		MEDICATION_NAME,
+		CASE WHEN RX_TEMPLT_TYP_NAME IS NOT NULL THEN 'Yes'
+			ELSE 'No' END "Mixture"
+FROM RX_MED_TWO
+
+**Exercise 5-4: CASE with Multiple Columns**
+
+USE Caboodle_Feb
+
+SELECT PatientEpicId,
+	Name,
+	CASE WHEN WorkPhoneNumber <> '' THEN WorkPhoneNumber
+		 WHEN HomePhoneNumber <> '' THEN HomePhoneNumber
+		 ELSE 'No phone listed' END "Phone"
+FROM PatientDim_Current
+
+
+**Exercise 5-6: WHERE Clause with Numeric Values**
+
+USE Caboodle_Feb
+
+SELECT AccountEpicId,
+	CONCAT('$',CAST(ActiveArBalance AS varchar)) AS "Active Balance"
+FROM BillingAccountFact
+WHERE HasOpenDenial = 1
+
+
+
+**Exercise 5-7: WHERE Clause with Character Strings**
+
+USE Caboodle_Feb
+
+SELECT Name,
+	ProviderEpicId,
+	PrimarySpecialty
+FROM ProviderDim_Current
+WHERE OfficePostalCode = '53593'
+
+**Exercise 5-8: No Column Aliases in the WHERE Clause**
+
+USE Caboodle_Feb
+
+SELECT PatientEpicId,
+	Name,
+	CASE WHEN WorkPhoneNumber <> '' THEN WorkPhoneNumber
+		 WHEN HomePhoneNumber <> '' THEN HomePhoneNumber
+		 ELSE 'No phone listed' END "Phone"
+FROM PatientDim_Current
+WHERE NOT ((CASE WHEN WorkPhoneNumber <> '' THEN WorkPhoneNumber
+				 WHEN HomePhoneNumber <> '' THEN HomePhoneNumber
+				 ELSE 'No phone listed' END) 
+			LIKE '%-555-%')
+
+
+**Exercise 5-10: ORDER BY a Column**
+
+USE Caboodle_Feb
+
+SELECT Address,
+		City,
+		StateOrProvince,
+		PostalCode
+FROM AddressDim
+WHERE PostalCode <> ''
+ORDER BY PostalCode
+
+
+**Exercise 5-11: ORDER BY Multiple Columns**
+
+USE Clarity_Feb
+
+SELECT PAT_ID,
+		PAT_NAME,
+		AGE_YEARS,
+		CUR_PCP_NAME_WID
+FROM V_PAT_FACT
+ORDER BY CUR_PCP_PROV_ID, PAT_NAME
+
+
+
+**Exercise 5-12: ORDER BY a Column in Reverse**
+
+USE Caboodle_Feb
+
+SELECT ProcedureOrderFact.ProcedureOrderEpicId,
+		ProcedureDim.ProcedureEpicId,
+		ProcedureDim.Name,
+		ProcedureOrderFact.OrderedDateKey
+FROM ProcedureOrderFact
+	INNER JOIN ProcedureDim
+		ON ProcedureOrderFact.ProcedureKey = ProcedureDim.ProcedureKey
+ORDER BY OrderedDateKey DESC
+
+
+**Exercise 5-12: ORDER BY a Column in Reverse**
+
+USE Caboodle_Feb
+
+SELECT ProcedureOrderFact.ProcedureOrderEpicId,
+		ProcedureDim.ProcedureEpicId,
+		ProcedureDim.Name,
+		ProcedureOrderFact.OrderedDateKey
+FROM ProcedureOrderFact
+	INNER JOIN ProcedureDim
+		ON ProcedureOrderFact.ProcedureKey = ProcedureDim.ProcedureKey
+ORDER BY OrderedDateKey DESC
+
+
+**Exercise 6-2: Counting Rows and Filtering**
+
+USE Caboodle_Feb
+
+SELECT COUNT(*) AS "Number of Providers"
+FROM ProviderDim_Current
+WHERE EntityType = 'Individual'
+
+
+
+**Exercise 6-3: Summing Rows**
+
+USE Caboodle_Feb
+
+SELECT SUM(TotalAccountBalance) AS "Current Balances",
+		SUM(TotalAdjustmentAmount) AS "Adjustments",
+		SUM(TotalChargeAmount) AS "Charges",
+		SUM(TotalPaymentAmount) AS "Payments"
+FROM BillingAccountFact
+
+
+
+**Exercise 6-5: Counting and Summing**
+
+USE Caboodle_Feb
+
+SELECT HasOpenDenial,
+	SUM(TotalAccountBalance) AS "Total Balance",
+	COUNT(*) AS "Number of Accounts"
+FROM BillingAccountFact
+--Exclude professional accounts
+WHERE HasOpenDenial IS NOT NULL
+GROUP BY HasOpenDenial
+
+
+**Exercise 6-6: Grouping and Filtering**
+
+USE Caboodle_Feb
+
+SELECT City,
+	StateOrProvince,
+	COUNT(*) AS "Number of Patients"
+FROM PatientDim_Current
+--Test your WHERE clauses here
+GROUP BY City, StateOrProvince
+
+
+
+**Exercise 6-7: Attempting to Select an Ungrouped Column**
+
+USE Caboodle_Feb
+
+SELECT ProviderDim_Current.ProviderEpicId,
+	--Try to add the provider's name here
+	COUNT(*) AS "Number of Patients"
+FROM PatientDim_Current
+	INNER JOIN ProviderDim_Current
+		ON PatientDim_Current.PrimaryCareProviderKey = ProviderDim_Current.ProviderKey
+GROUP BY ProviderDim_Current.ProviderEpicId
+
+
+**Exercise 6-8: Group by ID and Name**
+
+USE Caboodle_Feb
+
+SELECT ProviderDim_Current.ProviderEpicId,
+	ProviderDim_Current.Name,
+	COUNT(*) AS "Number of Patients"
+FROM PatientDim_Current
+	INNER JOIN ProviderDim_Current
+		ON PatientDim_Current.PrimaryCareProviderKey = ProviderDim_Current.ProviderKey
+GROUP BY ProviderDim_Current.ProviderEpicId, ProviderDim_Current.Name
+
+
+**Exercise 6-9: SELECT MAX(NAME)**
+
+USE Caboodle_Feb
+
+SELECT ProviderDim_Current.ProviderEpicId,
+	MAX(ProviderDim_Current.Name) AS "Provider Name",
+	COUNT(*) AS "Number of Patients"
+FROM PatientDim_Current
+	INNER JOIN ProviderDim_Current
+		ON PatientDim_Current.PrimaryCareProviderKey = ProviderDim_Current.ProviderKey
+GROUP BY ProviderDim_Current.ProviderEpicId
+
+
+
+**Exercise 6-10: Grouping on Multiple Columns**
+
+USE Caboodle_Feb
+
+SELECT City,
+	StateOrProvince,
+	COUNT(*) AS "Number of Patients"
+FROM PatientDim_Current
+GROUP BY City, StateOrProvince
+
+
+
+**Exercise 6-11: Grouping and Ordering**
+
+USE Caboodle_Feb
+
+SELECT City,
+	StateOrProvince,
+	COUNT(*) AS "Number of Patients"
+FROM PatientDim_Current
+GROUP BY City, StateOrProvince
+ORDER BY "Number of Patients" DESC
+
+
+**Exercise 7-1: Using a Temp Table**
+
+USE Caboodle_Feb
+
+-- Part 1: Create a Temp Table
+SELECT PatientKey,
+		PrimaryMrn
+	INTO #PatientGroup
+FROM PatientDim_Current
+WHERE City = 'Madison'
+	AND AgeInYears BETWEEN 18 AND 55
+
+-- Part 2: Write a Query that Uses the Temp Table
+-- Highlight the query below before clicking Execute to avoid re-running the temp table.
+SELECT #PatientGroup.PrimaryMrn,
+	EdVisitFact.EncounterEpicCsn,
+	EdVisitFact.FinancialClass
+FROM EdVisitFact
+	INNER JOIN #PatientGroup
+		ON EdVisitFact.PatientKey = #PatientGroup.PatientKey
+WHERE EdVisitFact.ArrivalMethod = 'Ambulance'
+
+
+
